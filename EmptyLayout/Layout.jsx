@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Layout, message} from 'antd';
 import {withRouter} from 'react-router-dom';
-import Auth from 'api/Auth';
+import {Auth} from 'api';
 
 import './Layout.scss';
 

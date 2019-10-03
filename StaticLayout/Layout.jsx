@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Layout, Menu, Tooltip, Button} from 'antd';
 import {withRouter} from 'react-router-dom';
-import hRouter from 'router';
+import {Router as hRouter} from 'structure';
 import './Layout.scss';
 
 const {Header, Content} = Layout;

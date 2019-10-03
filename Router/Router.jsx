@@ -155,7 +155,7 @@ const Router = {
   build: () => {
     const routerWithReactRouter4 = Router.recursive(Router.config);
     const routeChildren = Router.render(null, routerWithReactRouter4, '/');
-    return <index.router>{routeChildren}</index.router>;
+    return <Router.router>{routeChildren}</Router.router>;
   },
 
 };
