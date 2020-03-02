@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Spin, Layout, Menu, Icon, message} from 'antd';
 import {withRouter} from 'react-router-dom';
 import {Api} from 'api';
-import {Cookie, I18n, Img} from 'foundation';
+import {Cookie, I18n, Img} from 'basic';
 import hRouter from './../Router/Router';
 
 import './Layout.scss';
