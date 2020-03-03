@@ -25,7 +25,7 @@ export default class AppLayout extends Component {
       if (resUser.code === 200) {
         // nothing
       } else {
-        alert(resUser.response);
+        alert(resUser.msg);
       }
     });
   }
