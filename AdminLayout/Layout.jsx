@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
-import { Spin, Layout, Menu, message } from 'antd';
-import { LoginOutlined } from '@ant-design/icons';
-import { withRouter } from 'react-router-dom';
-import { Api } from 'api';
-import { Cookie, I18n, Img } from 'basic';
+import React, {Component} from 'react';
+import {Spin, Layout, Menu, message} from 'antd';
+import {LoginOutlined} from '@ant-design/icons';
+import {withRouter} from 'react-router-dom';
+import {Api, Auth} from 'api';
+import {Cookie, I18n, Img} from 'basic';
 import hRouter from './../Router/Router';
 
 import './Layout.scss';
 
-const { Header, Content, Sider } = Layout;
+const {Header, Content, Sider} = Layout;
 const SubMenu = Menu.SubMenu;
 
 class hLayout extends Component {
@@ -58,42 +58,44 @@ class hLayout extends Component {
 
   componentDidMount() {
     console.log(this.children);
-    Api.query().cache('getUserInfo', { uid: Auth.getUid() }, (resUser) => {
-      if (resUser.code === 200) {
-        this.setState({
-          userInfo: resUser.data,
-        });
-        Api.cache('System.Data.getInfoForKey', { key: ['path', 'permission'] }, (res) => {
-          // path
-          if (resUser.data.user_check_path === true) {
-            if (res.code === 200) {
-              const permissionPath = this.getPermissionPath(resUser.data.user_permission, res.data.permission.system_data_data);
-              const path = [];
-              res.data.path.system_data_data.forEach((p) => {
-                if (!permissionPath.includes(p.key)) {
-                  path.push(p.key);
-                }
-              });
-              this.state.path = path;
-              this.setState({ path: this.state.path });
-              this.routerFlat = this.flatRouter(this.routerAll);
-              this.setState({ routerHead: this.headRouter(), active: this.getActive(), open: this.getOpen() });
-              this.setState({ permissionLoading: false });
+    if (Auth.isOnline()) {
+      Api.query().cache('getUserInfo', {uid: Auth.getUid()}, (resUser) => {
+        if (resUser.code === 200) {
+          this.setState({
+            userInfo: resUser.data,
+          });
+          Api.cache('System.Data.getInfoForKey', {key: ['path', 'permission']}, (res) => {
+            // path
+            if (resUser.data.user_check_path === true) {
+              if (res.code === 200) {
+                const permissionPath = this.getPermissionPath(resUser.data.user_permission, res.data.permission.system_data_data);
+                const path = [];
+                res.data.path.system_data_data.forEach((p) => {
+                  if (!permissionPath.includes(p.key)) {
+                    path.push(p.key);
+                  }
+                });
+                this.state.path = path;
+                this.setState({path: this.state.path});
+                this.routerFlat = this.flatRouter(this.routerAll);
+                this.setState({routerHead: this.headRouter(), active: this.getActive(), open: this.getOpen()});
+                this.setState({permissionLoading: false});
+              } else {
+                message.error(resUser.msg);
+              }
             } else {
-              message.error(resUser.msg);
+              this.state.path = [];
+              this.setState({path: this.state.path});
+              this.routerFlat = this.flatRouter(this.routerAll);
+              this.setState({routerHead: this.headRouter(), active: this.getActive(), open: this.getOpen()});
+              this.setState({permissionLoading: false});
             }
-          } else {
-            this.state.path = [];
-            this.setState({ path: this.state.path });
-            this.routerFlat = this.flatRouter(this.routerAll);
-            this.setState({ routerHead: this.headRouter(), active: this.getActive(), open: this.getOpen() });
-            this.setState({ permissionLoading: false });
-          }
-        });
-      } else {
-        message.error(resUser.msg);
-      }
-    });
+          });
+        } else {
+          message.error(resUser.msg);
+        }
+      });
+    }
   }
 
   getPermissionPath = (userPermission, permission, path = [], prevKey = []) => {
@@ -236,7 +238,7 @@ class hLayout extends Component {
     console.log(`onMenuClick:${evt.key}`);
     switch (evt.key) {
       case 'loginOut':
-        Api.real('User.Online.logout', { uid: Auth.getUid() }, (res) => {
+        Api.real('User.Online.logout', {uid: Auth.getUid()}, (res) => {
           if (res.code === 200) {
             message.success(I18n('LOGOUT_SUCCESS'));
             Auth.clearUid();
@@ -271,14 +273,14 @@ class hLayout extends Component {
             case 'disabled':
             default:
               return (<Menu.Item key={val.jumpPath}
-                disabled>{val.icon !== undefined ? val.icon : ''}<span>{val.name}</span></Menu.Item>);
+                                 disabled>{val.icon !== undefined ? val.icon : ''}<span>{val.name}</span></Menu.Item>);
           }
         } else if (val.children !== undefined && val.children.length > 0) {
           return (<SubMenu key={val.jumpPath} disabled={val.disabled} title={
             <span>{val.icon !== undefined ? val.icon : ''}<span>{val.name}</span></span>}>{this.renderSub(val.children)}</SubMenu>);
         }
         return (<Menu.Item key={val.jumpPath}
-          disabled={val.disabled}>{val.icon !== undefined ? val.icon : ''}<span>{val.name}</span></Menu.Item>);
+                           disabled={val.disabled}>{val.icon !== undefined ? val.icon : ''}<span>{val.name}</span></Menu.Item>);
       })
     );
   };
@@ -293,10 +295,10 @@ class hLayout extends Component {
             onCollapse={this.onCollapse}
           >
             <div className="logo">
-              <Img alt="logo" src={this.state.userInfo.avatar} />
-              <div style={{ color: this.props.h.primaryColor || '#999' }}> {Auth.userName(this.state.userInfo)} </div>
+              <Img alt="logo" src={this.state.userInfo.avatar}/>
+              <div style={{color: this.props.h.primaryColor || '#999'}}> {Auth.userName(this.state.userInfo)} </div>
             </div>
-            {this.state.permissionLoading === true && <Spin style={style.loading} shape="dot-circle" color="#aaaaaa" />}
+            {this.state.permissionLoading === true && <Spin style={style.loading} shape="dot-circle" color="#aaaaaa"/>}
             {
               this.state.permissionLoading === false &&
               <Menu
@@ -309,14 +311,14 @@ class hLayout extends Component {
               >
                 {this.renderSub(this.children)}
                 {this.theme.singleMenu === true &&
-                  <Menu.Item key="loginOut" className="loginOutSingleMenu"><LoginOutlined />退出</Menu.Item>}
+                <Menu.Item key="loginOut" className="loginOutSingleMenu"><LoginOutlined/>退出</Menu.Item>}
               </Menu>
             }
           </Sider>
           <Layout style={style.Layout}>
             {
               this.theme.singleMenu === false &&
-              <Header style={{ height: this.theme.headerHeight, ...style.Header }}>
+              <Header style={{height: this.theme.headerHeight, ...style.Header}}>
                 <Menu
                   theme={this.theme.type}
                   mode="horizontal"
@@ -327,9 +329,9 @@ class hLayout extends Component {
                   <Menu.Item className="indexMenu">ucprimeconnect</Menu.Item>
                   {this.state.routerHead.map((val) => {
                     return <Menu.Item disabled={val.disabled}
-                      key={val.jumpPath}>{val.icon !== undefined ? val.icon : ''}{val.name}</Menu.Item>;
+                                      key={val.jumpPath}>{val.icon !== undefined ? val.icon : ''}{val.name}</Menu.Item>;
                   })}
-                  <Menu.Item key="loginOut" className="loginOut"><LoginOutlined />退出</Menu.Item>
+                  <Menu.Item key="loginOut" className="loginOut"><LoginOutlined/>退出</Menu.Item>
                 </Menu>
               </Header>
             }
@@ -344,12 +346,12 @@ class hLayout extends Component {
 }
 
 const style = {
-  loading: { width: '100%', marginTop: '100px' },
-  FullHV: { minHeight: '100hv' },
-  Layout: { height: '100hv', display: 'flex', flexDirection: 'column' },
-  Header: { margin: 0, padding: 0 },
-  HeaderMenu: { lineHeight: '60px', textAlign: 'right', background: '#3080fe' },
-  Content: { margin: 0, background: '#ffffff' },
+  loading: {width: '100%', marginTop: '100px'},
+  FullHV: {minHeight: '100hv'},
+  Layout: {height: '100hv', display: 'flex', flexDirection: 'column'},
+  Header: {margin: 0, padding: 0},
+  HeaderMenu: {lineHeight: '60px', textAlign: 'right', background: '#3080fe'},
+  Content: {margin: 0, background: '#ffffff'},
 };
 
 export default withRouter(hLayout);
